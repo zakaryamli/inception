@@ -14,8 +14,8 @@ attempt=1
 
 while [ $attempt -le $max_retries ]; do
     if mariadb -h mariadb -P 3306 \
-        -u "{$INCEPTION_MYSQL_USER}" \
-        -p"{$INCEPTION_MYSQL_PASS}" \
+        -u "${INCEPTION_MYSQL_USER}" \
+        -p"${INCEPTION_MYSQL_PASS}" \
         -e "SELECT 1" > /dev/null 2>&1; then
         break
     else

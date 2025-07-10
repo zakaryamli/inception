@@ -1,69 +1,52 @@
-WP_DATA = $(HOME)/data/wordpress
-DB_DATA = $(HOME)/data/mariadb
-PO_DATA = $(HOME)/data/portainer
+WP_DATA  = "$(HOME)/data/wordpress"
+DB_DATA  = "$(HOME)/data/mariadb"
+
+COMPOSE  = docker-compose -f ./srcs/docker-compose.yml
 
 all: up
 
 up: build
-	@mkdir -p $(WP_DATA)
-	@mkdir -p $(DB_DATA)
-	@mkdir -p $(PO_DATA)WP_DATA = $(HOME)/data/wordpress
-DB_DATA = $(HOME)/data/mariadb
-PO_DATA = $(HOME)/data/portainer
-
-all: up
-
-up: build
-	@mkdir -p $(WP_DATA)
-	@mkdir -p $(DB_DATA)
-	@mkdir -p $(PO_DATA)
-	docker-compose -f ./srcs/docker-compose.yml up -d
+	@mkdir -p $(WP_DATA) $(DB_DATA)
+	@$(COMPOSE) up -d
 
 down:
-	docker-compose -f ./srcs/docker-compose.yml down
+	@$(COMPOSE) down
 
 stop:
-	docker-compose -f ./srcs/docker-compose.yml stop
+	@$(COMPOSE) stop
 
 start:
-	docker-compose -f ./srcs/docker-compose.yml start
+	@$(COMPOSE) start
 
 build:
-	docker-compose -f ./srcs/docker-compose.yml build
+	@$(COMPOSE) build
+
+rebuild:
+	@$(COMPOSE) build --no-cache
+	@$(COMPOSE) up -d
+
+logs:
+	@$(COMPOSE) logs -f
+
+exec:
+	@docker exec -it wordpress bash
+
+env-check:
+	@echo "ENV File Preview:"
+	@cat .env | grep -v '^#'
 
 clean:
-	@docker-compose -f ./srcs/docker-compose.yml down --rmi all --remove-orphans
+	@$(COMPOSE) down --rmi all --remove-orphans
 	@docker network rm inception 2>/dev/null || true
 
 fclean: clean
-	@sudo rm -rf $(WP_DATA) $(DB_DATA) $(PO_DATA)2>/dev/null || true
+	@sudo rm -rf $(WP_DATA) $(DB_DATA) 2>/dev/null || true
 
-re: clean up
-
-purge: fclean
-	@docker system prune -a --volumes -f
-	docker-compose -f ./srcs/docker-compose.yml up -d
-
-down:
-	docker-compose -f ./srcs/docker-compose.yml down
-
-stop:
-	docker-compose -f ./srcs/docker-compose.yml stop
-
-start:
-	docker-compose -f ./srcs/docker-compose.yml start
-
-build:
-	docker-compose -f ./srcs/docker-compose.yml build
-
-clean:
-	@docker-compose -f ./srcs/docker-compose.yml down --rmi all --remove-orphans
-	@docker network rm inception 2>/dev/null || true
-
-fclean: clean
-	@sudo rm -rf $(WP_DATA) $(DB_DATA) $(PO_DATA)2>/dev/null || true
-
-re: clean up
+re: fclean up
 
 purge: fclean
 	@docker system prune -a --volumes -f
+
+ls:
+	@docker ps
+
